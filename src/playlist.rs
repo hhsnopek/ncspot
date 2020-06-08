@@ -4,7 +4,7 @@ use std::sync::Arc;
 use rspotify::model::playlist::{FullPlaylist, SimplifiedPlaylist};
 
 use crate::library::Library;
-use crate::queue::Queue;
+use crate::queue::{Queue, Playable};
 use crate::spotify::Spotify;
 use crate::track::Track;
 use crate::traits::{IntoBoxedViewExt, ListItem, ViewExt};
@@ -95,8 +95,8 @@ impl ListItem for Playlist {
                 .read()
                 .unwrap()
                 .iter()
-                .filter(|t| t.id.is_some())
-                .map(|t| t.id.clone().unwrap())
+                .filter(|t| t.id().is_some())
+                .map(|t| t.id().clone().unwrap())
                 .collect();
             let ids: Vec<String> = tracks
                 .iter()
@@ -140,8 +140,9 @@ impl ListItem for Playlist {
     fn play(&mut self, queue: Arc<Queue>) {
         self.load_tracks(queue.get_spotify());
 
-        if let Some(tracks) = self.tracks.as_ref() {
-            let index = queue.append_next(tracks.iter().collect());
+        if let Some(tracks) = &self.tracks {
+            let tracks: Vec<Playable> = tracks.iter().map(|track| Playable::Track(track.clone())).collect();
+            let index = queue.append_next(tracks);
             queue.play(index, true, true);
         }
     }
@@ -151,7 +152,7 @@ impl ListItem for Playlist {
 
         if let Some(tracks) = self.tracks.as_ref() {
             for track in tracks.iter() {
-                queue.append(track);
+                queue.append(Playable::Track(track.clone()));
             }
         }
     }
