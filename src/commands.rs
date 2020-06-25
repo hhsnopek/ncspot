@@ -49,6 +49,7 @@ impl CommandManager {
         for (key, command) in custom_bindings.unwrap_or_default() {
             if let Some(command) = parse(&command) {
                 info!("Custom keybinding: {} -> {:?}", key, command);
+
                 kb.insert(key, command);
             } else {
                 error!("Invalid command for key {}: {}", key, command);
@@ -236,7 +237,7 @@ impl CommandManager {
         kb.insert("<".into(), Command::Previous);
         kb.insert(">".into(), Command::Next);
         kb.insert("c".into(), Command::Clear);
-        kb.insert(" ".into(), Command::Queue);
+        kb.insert("Space".into(), Command::Queue);
         kb.insert("Enter".into(), Command::Play);
         kb.insert("s".into(), Command::Save);
         kb.insert("Ctrl+s".into(), Command::SaveQueue);
@@ -371,6 +372,7 @@ impl CommandManager {
             "F10" => Event::Key(Key::F10),
             "F11" => Event::Key(Key::F11),
             "F12" => Event::Key(Key::F12),
+            "Space" => Event::Char(" ".chars().next().unwrap()),
             s => Event::Char(s.chars().next().unwrap()),
         }
     }
